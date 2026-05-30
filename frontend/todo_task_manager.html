@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root{
+    --bg:#0e0e0f;
+    --surface:#161617;
+    --surface2:#1e1e20;
+    --border:#2a2a2e;
+    --accent:#c8f135;
+    --accent-dim:#9fbe28;
+    --text:#f0f0ee;
+    --muted:#6b6b72;
+    --done:#3a3a3e;
+    --done-text:#555560;
+    --high:#ff6b6b;
+    --med:#ffb347;
+    --low:#c8f135;
+    --rad:10px;
+  }
+
+  body{
+    font-family:'DM Mono',monospace;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding:2rem 1.5rem;
+  }
+
+  .header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    margin-bottom:2rem;
+    border-bottom:1px solid var(--border);
+    padding-bottom:1.25rem;
+  }
+
+  .logo{
+    font-family:'Syne',sans-serif;
+    font-size:1.6rem;
+    font-weight:800;
+    letter-spacing:-0.5px;
+    line-height:1;
+  }
+  .logo span{color:var(--accent)}
+
+  .stats{
+    display:flex;
+    gap:1.5rem;
+  }
+  .stat{text-align:right}
+  .stat-num{
+    font-family:'Syne',sans-serif;
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--accent);
+    line-height:1;
+  }
+  .stat-label{font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px}
+
+  /* Add form */
+  .add-form{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--rad);
+    padding:1.25rem 1.25rem 1rem;
+    margin-bottom:1.5rem;
+  }
+
+  .form-row{display:flex;gap:0.75rem;align-items:stretch;margin-bottom:0.75rem}
+
+  .task-input{
+    flex:1;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:0.7rem 1rem;
+    font-family:'DM Mono',monospace;
+    font-size:0.85rem;
+    color:var(--text);
+    outline:none;
+    transition:border-color 0.15s;
+  }
+  .task-input:focus{border-color:var(--accent)}
+  .task-input::placeholder{color:var(--muted)}
+
+  .form-row2{display:flex;gap:0.75rem;align-items:center}
+
+  select{
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:0.5rem 0.75rem;
+    font-family:'DM Mono',monospace;
+    font-size:0.78rem;
+    color:var(--text);
+    outline:none;
+    cursor:pointer;
+  }
+  select:focus{border-color:var(--accent)}
+
+  .btn-add{
+    background:var(--accent);
+    color:#0e0e0f;
+    border:none;
+    border-radius:8px;
+    padding:0.5rem 1.25rem;
+    font-family:'Syne',sans-serif;
+    font-size:0.82rem;
+    font-weight:700;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    transition:background 0.15s,transform 0.1s;
+    white-space:nowrap;
+  }
+  .btn-add:hover{background:var(--accent-dim)}
+  .btn-add:active{transform:scale(0.97)}
+
+  /* Filter bar */
+  .filter-bar{
+    display:flex;
+    gap:0.5rem;
+    margin-bottom:1.25rem;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:0.35rem 0.85rem;
+    font-family:'DM Mono',monospace;
+    font-size:0.72rem;
+    color:var(--muted);
+    cursor:pointer;
+    transition:all 0.15s;
+    letter-spacing:0.04em;
+  }
+  .filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#0e0e0f;font-weight:500}
+
+  /* Task list */
+  .task-list{display:flex;flex-direction:column;gap:0.6rem}
+
+  .task-item{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--rad);
+    padding:0.9rem 1rem;
+    display:flex;
+    align-items:flex-start;
+    gap:0.75rem;
+    transition:border-color 0.15s,opacity 0.2s;
+    position:relative;
+    overflow:hidden;
+  }
+  .task-item::before{
+    content:'';
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:3px;
+    border-radius:3px 0 0 3px;
+  }
+  .task-item.prio-high::before{background:var(--high)}
+  .task-item.prio-med::before{background:var(--med)}
+  .task-item.prio-low::before{background:var(--low)}
+
+  .task-item.done{
+    opacity:0.5;
+    border-color:var(--done);
+  }
+  .task-item.done .task-title{
+    text-decoration:line-through;
+    color:var(--done-text);
+  }
+
+  /* Checkbox */
+  .check-box{
+    width:18px;height:18px;min-width:18px;
+    border:1.5px solid var(--border);
+    border-radius:5px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    margin-top:1px;
+    transition:all 0.15s;
+    background:transparent;
+  }
+  .check-box:hover{border-color:var(--accent)}
+  .check-box.checked{background:var(--accent);border-color:var(--accent)}
+  .check-box.checked::after{
+    content:'✓';
+    font-size:11px;
+    color:#0e0e0f;
+    font-weight:700;
+  }
+
+  .task-body{flex:1;min-width:0}
+
+  .task-title{
+    font-size:0.85rem;
+    font-weight:400;
+    line-height:1.4;
+    word-break:break-word;
+    margin-bottom:4px;
+  }
+
+  .task-meta{
+    display:flex;
+    align-items:center;
+    gap:0.6rem;
+    flex-wrap:wrap;
+  }
+
+  .prio-badge{
+    font-size:0.65rem;
+    padding:2px 8px;
+    border-radius:4px;
+    letter-spacing:0.07em;
+    text-transform:uppercase;
+    font-weight:500;
+  }
+  .prio-badge.high{background:#ff6b6b22;color:var(--high)}
+  .prio-badge.med{background:#ffb34722;color:var(--med)}
+  .prio-badge.low{background:#c8f13522;color:var(--low)}
+
+  .cat-badge{
+    font-size:0.65rem;
+    color:var(--muted);
+    background:var(--surface2);
+    padding:2px 8px;
+    border-radius:4px;
+    border:1px solid var(--border);
+  }
+
+  .task-date{font-size:0.63rem;color:var(--muted)}
+
+  .task-actions{
+    display:flex;
+    gap:0.4rem;
+    margin-left:auto;
+    opacity:0;
+    transition:opacity 0.15s;
+  }
+  .task-item:hover .task-actions{opacity:1}
+
+  .btn-icon{
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:0.3rem 0.5rem;
+    font-size:0.8rem;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all 0.15s;
+    font-family:'DM Mono',monospace;
+  }
+  .btn-icon:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-icon.del:hover{border-color:var(--high);color:var(--high)}
+
+  /* Inline edit */
+  .edit-input{
+    background:var(--surface2);
+    border:1px solid var(--accent);
+    border-radius:6px;
+    padding:0.3rem 0.6rem;
+    font-family:'DM Mono',monospace;
+    font-size:0.85rem;
+    color:var(--text);
+    outline:none;
+    width:100%;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:3rem 1rem;
+    color:var(--muted);
+    font-size:0.8rem;
+    letter-spacing:0.05em;
+    border:1px dashed var(--border);
+    border-radius:var(--rad);
+  }
+  .empty-state .em{
+    font-family:'Syne',sans-serif;
+    font-size:2rem;
+    font-weight:800;
+    color:var(--border);
+    display:block;
+    margin-bottom:0.5rem;
+  }
+
+  .section-label{
+    font-size:0.65rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:0.6rem;
+    padding-left:0.25rem;
+  }
+</style>
+
+<div class="header">
+  <div class="logo">task<span>.</span>mgr</div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">total</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-done">0</div>
+      <div class="stat-label">done</div>
+    </div>
+  </div>
+</div>
+
+<div class="add-form">
+  <div class="form-row">
+    <input class="task-input" id="task-input" type="text" placeholder="Add a new task..." />
+  </div>
+  <div class="form-row2">
+    <select id="prio-select">
+      <option value="low">↓ Low</option>
+      <option value="med" selected>→ Medium</option>
+      <option value="high">↑ High</option>
+    </select>
+    <select id="cat-select">
+      <option value="general">General</option>
+      <option value="work">Work</option>
+      <option value="personal">Personal</option>
+      <option value="shopping">Shopping</option>
+      <option value="health">Health</option>
+    </select>
+    <button class="btn-add" id="btn-add">+ Add Task</button>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="active">Active</button>
+  <button class="filter-btn" data-filter="done">Done</button>
+  <button class="filter-btn" data-filter="high">↑ High</button>
+  <button class="filter-btn" data-filter="med">→ Med</button>
+  <button class="filter-btn" data-filter="low">↓ Low</button>
+</div>
+
+<div class="section-label" id="list-label">all tasks</div>
+<div class="task-list" id="task-list"></div>
+
+<script>
+const API = 'http://localhost:3000/tasks';
+let tasks = [];
+let filter = 'all';
+let editingId = null;
+
+function getFromStorage(){
+  try{ return JSON.parse(localStorage.getItem('tasks_mgr')||'[]') }
+  catch(e){ return [] }
+}
+function saveToStorage(){ localStorage.setItem('tasks_mgr', JSON.stringify(tasks)) }
+
+async function loadTasks(){
+  try{
+    const r = await fetch(API);
+    if(!r.ok) throw new Error();
+    tasks = await r.json();
+  } catch(e){
+    tasks = getFromStorage();
+  }
+  render();
+}
+
+async function addTask(title, priority, category){
+  const task = { id: Date.now().toString(), title, priority, category, done: false, createdAt: new Date().toISOString() };
+  try{
+    const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(task) });
+    if(!r.ok) throw new Error();
+    const saved = await r.json();
+    tasks.push(saved);
+  } catch(e){
+    tasks.push(task);
+    saveToStorage();
+  }
+  render();
+}
+
+async function toggleTask(id){
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.done = !t.done;
+  try{
+    await fetch(`${API}/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(t) });
+  } catch(e){ saveToStorage() }
+  render();
+}
+
+async function deleteTask(id){
+  tasks = tasks.filter(x=>x.id!==id);
+  try{
+    await fetch(`${API}/${id}`, { method:'DELETE' });
+  } catch(e){ saveToStorage() }
+  render();
+}
+
+async function editTask(id, newTitle){
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.title = newTitle;
+  try{
+    await fetch(`${API}/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(t) });
+  } catch(e){ saveToStorage() }
+  editingId = null;
+  render();
+}
+
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function filtered(){
+  if(filter==='all') return tasks;
+  if(filter==='active') return tasks.filter(t=>!t.done);
+  if(filter==='done') return tasks.filter(t=>t.done);
+  if(filter==='high') return tasks.filter(t=>t.priority==='high');
+  if(filter==='med') return tasks.filter(t=>t.priority==='med');
+  if(filter==='low') return tasks.filter(t=>t.priority==='low');
+  return tasks;
+}
+
+function render(){
+  const list = document.getElementById('task-list');
+  const label = document.getElementById('list-label');
+  const total = tasks.length;
+  const done = tasks.filter(t=>t.done).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+
+  const vis = filtered();
+  label.textContent = `${filter} tasks — ${vis.length}`;
+
+  if(!vis.length){
+    list.innerHTML = `<div class="empty-state"><span class="em">0</span>no tasks here</div>`;
+    return;
+  }
+
+  list.innerHTML = vis.map(t=>{
+    if(editingId===t.id){
+      return `<div class="task-item prio-${t.priority}${t.done?' done':''}">
+        <div class="check-box${t.done?' checked':''}" data-id="${t.id}" onclick="toggleTask('${t.id}')"></div>
+        <div class="task-body">
+          <input class="edit-input" id="edit-${t.id}" value="${t.title.replace(/"/g,'&quot;')}" />
+        </div>
+        <div class="task-actions" style="opacity:1">
+          <button class="btn-icon" onclick="commitEdit('${t.id}')">✓</button>
+          <button class="btn-icon del" onclick="cancelEdit()">✕</button>
+        </div>
+      </div>`;
+    }
+    const pb = `<span class="prio-badge ${t.priority}">${t.priority==='med'?'medium':t.priority}</span>`;
+    const cb = `<span class="cat-badge">${t.category||'general'}</span>`;
+    const dt = `<span class="task-date">${formatDate(t.createdAt)}</span>`;
+    return `<div class="task-item prio-${t.priority}${t.done?' done':''}">
+      <div class="check-box${t.done?' checked':''}" onclick="toggleTask('${t.id}')"></div>
+      <div class="task-body">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">${pb}${cb}${dt}</div>
+      </div>
+      <div class="task-actions">
+        <button class="btn-icon" onclick="startEdit('${t.id}')">✎</button>
+        <button class="btn-icon del" onclick="deleteTask('${t.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(editingId){
+    const inp = document.getElementById('edit-'+editingId);
+    if(inp){ inp.focus(); inp.select(); }
+  }
+}
+
+function startEdit(id){ editingId = id; render(); }
+function cancelEdit(){ editingId = null; render(); }
+function commitEdit(id){
+  const inp = document.getElementById('edit-'+id);
+  if(inp && inp.value.trim()) editTask(id, inp.value.trim());
+  else cancelEdit();
+}
+
+document.getElementById('btn-add').onclick = ()=>{
+  const inp = document.getElementById('task-input');
+  const title = inp.value.trim();
+  if(!title) return;
+  const prio = document.getElementById('prio-select').value;
+  const cat = document.getElementById('cat-select').value;
+  addTask(title, prio, cat);
+  inp.value='';
+  inp.focus();
+};
+
+document.getElementById('task-input').onkeydown = e=>{ if(e.key==='Enter') document.getElementById('btn-add').click(); };
+
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    filter = btn.dataset.filter;
+    render();
+  };
+});
+
+loadTasks();
+</script>
